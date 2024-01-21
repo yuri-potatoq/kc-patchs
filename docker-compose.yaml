@@ -1,0 +1,99 @@
+version: "3.9"
+
+services:
+  kc-local:
+    build:
+      context: .
+    container_name: kc_local
+    ports:
+      - "8080:8080"
+      - "5005:5005"
+    networks:
+      - kc-subnet
+    environment:
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_DB: ${KC_DB:-postgres}
+      KC_DB_URL: jdbc:postgresql://pg-local/postgres
+      KC_DB_USERNAME: ${KC_DB_USERNAME:-kc-user}
+      KC_DB_PASSWORD: ${KC_DB_PASSWORD:-kc-pass}
+      KC_METRICS_ENABLED: "true"
+      KC_HEALTH_ENABLED: "true"
+      KC_HTTP_RELATIVE_PATH: "/auth"
+      JAVA_OPTS: -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=*:5005
+    #volumes:
+      # - ./import:/opt/keycloak/data/import
+      # - ./keycloak-init-container/datadog:/opt/keycloak/datadog
+      # - ./keycloak-init-container/keycloak-metrics-spi-2.5.3.jar:/opt/keycloak/providers/keycloak-metrics-spi-2.5.3.jar
+      # - ./build/libs:/opt/keycloak/providers
+    command:
+      - "start-dev"
+      # - "--import-realm"
+      # - "--spi-theme-static-max-age=-1"
+      # - "--spi-theme-cache-themes=false"
+      # - "--spi-theme-cache-templates=false"
+      # - "--spi-events-listener-jboss-logging-success-level=info"
+      # - "--spi-events-listener-jboss-logging-error-level=warn"
+    depends_on: ["pg-local"]
+
+  pg-local:
+    image: postgres:15
+    container_name: pg_local
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ${KC_DB:-postgres}
+      POSTGRES_USER: ${KC_DB_USERNAME:-kc-user}
+      POSTGRES_PASSWORD: ${KC_DB_PASSWORD:-kc-pass}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  zoo:
+    image: confluentinc/cp-zookeeper:7.3.2
+    hostname: zoo
+    container_name: local_zoo
+    ports:
+      - "2181:2181"
+    networks:
+      - kc-subnet
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_SERVERS: zoo:2888:3888
+
+  kafka:
+    image: confluentinc/cp-kafka:7.3.2
+    hostname: kafka
+    container_name: local_kafka
+    expose:
+      - '29092'
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+      - "9999:9999"
+    networks:
+      - kc-subnet
+    environment:
+      KAFKA_CREATE_TOPICS: topic_test:1:1
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:19092,EXTERNAL://${DOCKER_HOST_IP:-host.docker.internal}:9092,DOCKER://host.docker.internal:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,DOCKER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_ZOOKEEPER_CONNECT: "zoo:2181"
+      KAFKA_BROKER_ID: 1
+      KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_JMX_PORT: 9999
+      KAFKA_JMX_HOSTNAME: ${DOCKER_HOST_IP:-127.0.0.1}
+      KAFKA_AUTHORIZER_CLASS_NAME: kafka.security.authorizer.AclAuthorizer
+      KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "true"
+    depends_on:
+      - zoo
+
+networks:
+  kc-subnet:
+
+volumes:
+  postgres_data:
+    driver: local
