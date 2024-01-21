@@ -99,6 +99,20 @@ services:
     depends_on:
       - zoo
 
+  schema-registry:
+    image: confluentinc/cp-schema-registry:7.3.2
+    depends_on:
+      - zookeeper
+      - kafka
+    ports:
+      - 8081:8081
+    networks:
+      - kc-subnet
+    container_name: sn-schema-registry
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'PLAINTEXT://kafka:29092'
+
 networks:
   kc-subnet:
     name: kc_subnet

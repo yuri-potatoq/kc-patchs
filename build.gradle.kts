@@ -1,5 +1,8 @@
+import com.google.protobuf.gradle.*
+
 plugins {
     kotlin("jvm") version "1.9.0"
+    id("com.google.protobuf") version "0.8.19"
     application
 }
 
@@ -29,6 +32,28 @@ dependencies {
     implementation("org.apache.kafka:kafka-clients:$kafkaVersion")
         // setup to avoid conflict with keycloak production "slf4j" dependency
         { exclude(group = "org.slf4j", module = "slf4j-api") }
+
+    // protobuf stuff
+    implementation("com.google.protobuf:protobuf-java:3.16.3")
+    implementation("io.confluent:kafka-protobuf-serializer:5.5.1")
+        { exclude(group = "org.slf4j", module = "slf4j-api") }
+
+    protobuf(files("protobuf/"))
+}
+
+protobuf {
+    protoc {
+        // The artifact spec for the Protobuf Compiler
+        artifact = "com.google.protobuf:protoc:3.16.3"
+    }
+
+    generateProtoTasks {
+        all().forEach { task ->
+            task.builtins {
+                kotlin {}
+            }
+        }
+    }
 }
 
 tasks.withType<Jar> {

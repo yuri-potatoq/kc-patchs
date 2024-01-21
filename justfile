@@ -10,6 +10,7 @@ run-kc target="container":
 run-kafka:
     {{ compose-up }} kafka
 
+
 kcat-exec := "podman run -it --network=kc_subnet edenhill/kcat:1.7.1"
 
 read-topic topic_name:

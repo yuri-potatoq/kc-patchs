@@ -1,6 +1,8 @@
 package com.github.yuri_potatoq.providers
 
 import com.github.yuri_potatoq.brokers.KafkaContext
+import keycloak_events.UserEventOuterClass
+import keycloak_events.UserEventOuterClass.UserEvent
 import org.apache.kafka.clients.producer.Callback
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.clients.producer.RecordMetadata
@@ -20,7 +22,7 @@ class CustomEventListenerProviderFactory : EventListenerProviderFactory {
             CustomEventListenerProviderFactory::class.java
         )
 
-        val kafkaProducer = KafkaContext.getProducer()
+        val kafkaProducer = KafkaContext.getProducer<UserEvent>()
 
         val customEventListener = object : EventListenerProvider {
             override fun onEvent(event: Event?) {
@@ -33,8 +35,16 @@ class CustomEventListenerProviderFactory : EventListenerProviderFactory {
                     else logger.infof("Message sent Error: %s", exception.toString())
                 }
 
-                var rec = kafkaProducer.send(
-                    ProducerRecord<String, String>("topic_test", "test", "test")
+                val eventData:  UserEvent = UserEvent.newBuilder()
+                    .setClientId(event?.clientId ?: "")
+                    .setRealmId(event?.realmId ?: "")
+                    .setUserId(event?.userId ?: "")
+                    .setError(event?.error ?: "")
+                    .setTime(event?.time?.toDouble() ?: Double.MIN_VALUE)
+                    .build()
+
+                kafkaProducer.send(
+                    ProducerRecord("topic_test", event?.sessionId, eventData)
                     , callback)
 
 
