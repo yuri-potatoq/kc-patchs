@@ -1,18 +1,19 @@
 version: "3.9"
 
 services:
-  kc-local:
+  kc-container-build:
     build:
       context: .
-    container_name: kc_local
+      dockerfile: dockerfiles/container-build.Dockerfile
+    container_name: kc_container_build
     ports:
       - "8080:8080"
       - "5005:5005"
     networks:
       - kc-subnet
     environment:
-      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
-      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
       KC_DB: ${KC_DB:-postgres}
       KC_DB_URL: jdbc:postgresql://pg-local/postgres
       KC_DB_USERNAME: ${KC_DB_USERNAME:-kc-user}
@@ -21,11 +22,6 @@ services:
       KC_HEALTH_ENABLED: "true"
       KC_HTTP_RELATIVE_PATH: "/auth"
       JAVA_OPTS: -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=*:5005
-    #volumes:
-      # - ./import:/opt/keycloak/data/import
-      # - ./keycloak-init-container/datadog:/opt/keycloak/datadog
-      # - ./keycloak-init-container/keycloak-metrics-spi-2.5.3.jar:/opt/keycloak/providers/keycloak-metrics-spi-2.5.3.jar
-      # - ./build/libs:/opt/keycloak/providers
     command:
       - "start-dev"
       # - "--import-realm"
@@ -35,6 +31,17 @@ services:
       # - "--spi-events-listener-jboss-logging-success-level=info"
       # - "--spi-events-listener-jboss-logging-error-level=warn"
     depends_on: ["pg-local"]
+
+  kc-host-build:
+    extends:
+      service: kc-container-build
+    container_name: kc_host_build
+    volumes:
+      #- ./import:/opt/keycloak/data/import
+      - ./build/libs:/opt/keycloak/providers:z
+    build:
+      context: .
+      dockerfile: dockerfiles/host-build.Dockerfile
 
   pg-local:
     image: postgres:15
@@ -67,6 +74,7 @@ services:
     container_name: local_kafka
     expose:
       - '29092'
+      - '9092'
     ports:
       - "9092:9092"
       - "29092:29092"
@@ -93,6 +101,7 @@ services:
 
 networks:
   kc-subnet:
+    name: kc_subnet
 
 volumes:
   postgres_data:
