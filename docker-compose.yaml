@@ -22,8 +22,15 @@ services:
       KC_HEALTH_ENABLED: "true"
       KC_HTTP_RELATIVE_PATH: "/auth"
       JAVA_OPTS: -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=*:5005
+
+      # kafka event listeners
+      KFK_EVL_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+      KFK_EVL_BOOTSTRAP_SERVERS: "host.docker.internal:9092"
+      KFK_EVL_TOPIC_NAME: "yuri-potatoq_keycloak_event_listener.v1"
     command:
       - "start-dev"
+      - "--log-level=info"
+      - "--log-console-output=default" # can be 'json'
       # - "--import-realm"
       # - "--spi-theme-static-max-age=-1"
       # - "--spi-theme-cache-themes=false"
@@ -110,8 +117,10 @@ services:
       - kc-subnet
     container_name: sn-schema-registry
     environment:
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://host.docker.internal:9092
+      #SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: zoo:2181
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'PLAINTEXT://kafka:29092'
+      SCHEMA_REGISTRY_LISTENERS: "http://0.0.0.0:8081"
 
 networks:
   kc-subnet:

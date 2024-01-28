@@ -1,1 +1,1 @@
-com.github.yuri_potatoq.providers.CustomEventListenerProviderFactory
+com.github.yuri_potatoq.providers.KafkaProducerEventListenerProviderFactory

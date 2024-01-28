@@ -111,15 +111,34 @@ enum EventType {
   USER_DISABLED_BY_PERMANENT_LOCKOUT_ERROR = 105;
 }
 
+message RealmInfo {
+  string id = 1;
+  string name = 2;
+}
+
+message ClientInfo {
+  string id = 1;
+  string name = 2;
+}
+
+message UserInfo {
+  string id = 1;
+  string email = 2;
+  string username = 4;
+  string idpName = 5;
+  repeated string groups = 6;
+  map<string, string> attributes  = 7;
+  string firstName  = 8;
+  string lastName  = 9;
+}
 
 message UserEvent {
   string id = 1;
   double time = 2;
   keycloak_events.EventType type = 3;
-  string realmId = 4;
-  string clientId = 5;
-  string userId = 6;
-  string sessionId = 7;
+  RealmInfo realm = 4;
+  ClientInfo client = 5;
+  UserInfo user = 6;
   string ipAddress = 8;
   string error = 9;
   map<string, string> details = 10;
