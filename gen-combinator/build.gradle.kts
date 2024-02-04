@@ -13,6 +13,13 @@ repositories {
 
 dependencies {
     testImplementation("junit:junit:4.13")
+
+    implementation("io.arrow-kt:arrow-core:1.2.0")
+
+    val kotlinxHtmlVersion = "0.11.0"
+
+    // include for JVM target
+    implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:$kotlinxHtmlVersion")
 }
 
 tasks.test {

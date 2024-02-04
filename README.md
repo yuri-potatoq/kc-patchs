@@ -25,3 +25,4 @@
 - https://docs.confluent.io/platform/current/schema-registry/develop/api.html#subjects
 - https://www.keycloak.org/docs/latest/server_development/index.html#simple-read-only-lookup-example
 - https://stackoverflow.com/questions/35587652/kotlin-thread-safe-native-lazy-singleton-with-parameter
+- https://github.com/Kotlin/kotlinx.html/blob/b6baa5f30dae06e10018dc6fecf2ce59989acb3e/src/jvmMain/kotlin/dom-jvm.kt#L123
