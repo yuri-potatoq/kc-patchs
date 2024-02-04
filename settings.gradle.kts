@@ -10,3 +10,7 @@ plugins {
 }
 
 rootProject.name = "kc-patchs"
+include("gen-combinator")
+include("kafka-event-listener")
+include("dynamic-user-federation")
+
