@@ -1,4 +1,4 @@
-package com.github.yuri_potatoq.brokers.kafka
+package com.github.yuri_potatoq
 
 import org.apache.kafka.clients.producer.Callback
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -34,7 +34,3 @@ sealed class CustomKafkaProducer<T>(private var topic: String) {
     class ProtobufKafkaProducer<T>(topic: String) :
         CustomKafkaProducer<T>(topic, KafkaContext.ProtobufProducerContext())
 }
-
-
-
-

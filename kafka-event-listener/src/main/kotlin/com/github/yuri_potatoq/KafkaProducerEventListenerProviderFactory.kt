@@ -1,6 +1,6 @@
-package com.github.yuri_potatoq.providers
+package com.github.yuri_potatoq
 
-import com.github.yuri_potatoq.brokers.kafka.CustomKafkaProducer
+import com.github.yuri_potatoq.CustomKafkaProducer
 import keycloak_events.UserEventOuterClass
 import keycloak_events.UserEventOuterClass.UserEvent
 import keycloak_events.UserEventOuterClass.ClientInfo

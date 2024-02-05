@@ -1,10 +1,8 @@
-package com.github.yuri_potatoq.brokers.kafka
-
+package com.github.yuri_potatoq
 
 import io.confluent.kafka.serializers.protobuf.KafkaProtobufSerializerConfig
-import org.apache.kafka.clients.producer.ProducerConfig;
-
-import java.util.Properties
+import org.apache.kafka.clients.producer.ProducerConfig
+import java.util.*
 
 
 typealias DefaultPropsHelper = Properties.( (String, Any) -> Any ) -> Unit
@@ -35,7 +33,7 @@ sealed class KafkaContext(val props: Properties) {
 
         private fun getEnvOrDefault(name: String, dft: Any) = env.getOrDefault(ENV_VAR_PREFIX+name, dft)
 
-        private inline fun Properties.applyDefaultProps(block: DefaultPropsHelper):  Properties {
+        private inline fun Properties.applyDefaultProps(block: DefaultPropsHelper): Properties {
             this[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = getEnvOrDefault("BOOTSTRAP_SERVERS", "0.0.0.0:9092")
             this[ProducerConfig.ACKS_CONFIG] = "all"
             this[ProducerConfig.BATCH_SIZE_CONFIG] = 16384
